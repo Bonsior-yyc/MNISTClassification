@@ -22,7 +22,6 @@ plt.imshow(train_set.data[0].numpy(), cmap="gray")
 print(train_set.data[0].numpy().shape)
 plt.show()
 
-
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
