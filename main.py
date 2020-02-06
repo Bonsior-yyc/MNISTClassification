@@ -5,6 +5,12 @@ import numpy as np
 import torchvision
 import matplotlib.pyplot as plt
 import torch.utils.data as tud
+import time
+
+start = time.perf_counter()
+
+print(torch.cuda.is_available())
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 NUM_EPOCH = 2
 BATCH_SIZE = 32
@@ -21,6 +27,7 @@ plt.figure()
 plt.imshow(train_set.data[0].numpy(), cmap="gray")
 print(train_set.data[0].numpy().shape)
 plt.show()
+
 
 class CNN(nn.Module):
     def __init__(self):
@@ -42,7 +49,7 @@ class CNN(nn.Module):
         return x
 
 
-net = CNN()
+net = CNN().to(device)
 optimizer = torch.optim.SGD(net.parameters(), lr=LR)
 loss_fn = nn.CrossEntropyLoss()
 
@@ -50,16 +57,19 @@ for epoch in range(NUM_EPOCH):
 
     for i, data in enumerate(train_loader):
         inputs, label = data
-
+        inputs = inputs.to(device)
+        label = label.to(device)
         optimizer.zero_grad()
         outputs = net(inputs)
         loss = loss_fn(outputs, label)
         loss.backward()
         optimizer.step()
         if i % 10 == 0:
-            print("epoch:", epoch, "iter", i, "loss", torch.sum(loss).item())
+            print("epoch:", epoch, "iter", i+1, "loss", torch.sum(loss).cpu().item())
 
+end = time.perf_counter()
 print('Finished Training')
+print("time cost:", end-start)
 
 with torch.no_grad():
     for i, data in enumerate(test_loader):
